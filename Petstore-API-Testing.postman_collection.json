@@ -1,0 +1,299 @@
+{
+  "info": {
+    "_postman_id": "e984f94b-996c-40dd-a752-516da96dc255",
+    "name": "Petstore API Testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58616167",
+    "_collection_link": "https://go.postman.co/collection/58616167-e984f94b-996c-40dd-a752-516da96dc255?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Bug Reports",
+      "item": [
+        {
+          "name": "BUG-001 - Invalid petId returns 404 instead of 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status code is 400\", function () {\r\n    pm.response.to.have.status(400);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pet/abc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pet",
+                "abc"
+              ]
+            },
+            "description": "Title:  \nGET /pet/{petId} returns 404 instead of 400 when petId has an invalid format\n\nPreconditions:  \nPetstore API is available.\n\nSteps to reproduce:\n\n1. Send GET request to {{base_url}}/pet/abc\n    \n2. Check the HTTP status code and response body.\n    \n\nExpected result:  \nAPI returns HTTP 400 (Invalid ID supplied), according to Swagger documentation.\n\nActual result:  \nAPI returns HTTP 404.\n\nResponse body contains a NumberFormatException for the value \"abc\".\n\nSeverity:  \nMinor"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Positive Tests",
+      "item": [
+        {
+          "name": "Get pet by ID - 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Pet ID is correct\", function () {\r\n    const jsonData = pm.response.json();\r\n   pm.expect(jsonData.id).to.eql(Number(pm.environment.get(\"petId\")));\r\n});\r\n\r\npm.test(\"Pet name is correct\", function () {\r\n    const jsonData = pm.response.json();\r\n    pm.expect(jsonData.name).to.eql(\"SofiaDog\");\r\n});\r\n\r\npm.test(\"Pet status is available\", function () {\r\n    const jsonData = pm.response.json();\r\n    pm.expect(jsonData.status).to.eql(\"available\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pet/{{petId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pet",
+                "{{petId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create pet - POST",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();\r\n\r\npm.environment.set(\"petId\", jsonData.id);"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const randomPetId = Math.floor(Math.random() * 900000000) + 100000000;\r\n\r\npm.environment.set(\"petId\", randomPetId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"id\": {{petId}},\r\n  \"name\": \"SofiaDog\",\r\n  \"photoUrls\": [],\r\n  \"status\": \"available\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/pet",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update pet - PUT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Pet name is updated\", function () {\r\n    const jsonData = pm.response.json();\r\n    pm.expect(jsonData.name).to.eql(\"SofiaDogUpdated\");\r\n});\r\n\r\npm.test(\"Pet status is updated\", function () {\r\n    const jsonData = pm.response.json();\r\n    pm.expect(jsonData.status).to.eql(\"sold\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"id\": {{petId}},\r\n  \"name\": \"SofiaDogUpdated\",\r\n  \"photoUrls\": [],\r\n  \"status\": \"sold\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/pet",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete pet - DELETE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pet/{{petId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pet",
+                "{{petId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Negative Tests",
+      "item": [
+        {
+          "name": "Get pet by ID - 404 Pet not found",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pet/999999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pet",
+                "999999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get pet by ID - Invalid ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pet/abc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pet",
+                "abc"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create pet - Invalid JSON",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400 for invalid JSON\", function () {\r\n    pm.response.to.have.status(400);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"id\": 123456789,\r\n  \"name\": \"SofiaDog\"\r\n  \"status\": \"available\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/pet",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete pet - 404 Not found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {\r\n    pm.response.to.have.status(404);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pet/{{petId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pet",
+                "{{petId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
